@@ -79,11 +79,13 @@ async def ctf_list(jwt: RequireJwt):
         i.points = int(acc[i.id] * i.points)  # type: ignore[attr-defined]
     return problems
 
+from pwncore.utils import PROBLEMS_CACHE
 
 async def update_points(req: Request, ctf_id: int):
     try:
         p = await Problem.get(id=ctf_id)
-        await p.update_points()
+        points = await p.update_points()
+        PROBLEMS_CACHE[ctf_id] = points
         req.app.state.force_expire = True
     except Exception:
         logger.exception("An error occured while updating points")

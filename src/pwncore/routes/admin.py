@@ -20,7 +20,7 @@ from pwncore.models import (
 )
 from pwncore.config import config
 from pwncore.models.container import Container
-from pwncore.models.ctf import SolvedProblem
+from pwncore.models.ctf import SolvedProblem, ViewedHint
 from pwncore.models.pre_event import PreEventUser
 from pwncore.container import docker_client
 from pwncore.models.round2 import R2Container, R2Ports, R2Problem
@@ -193,14 +193,15 @@ async def calculate_team_coins(
             logging.info(f"{team.id}) {team.name}: {team.coins}")
             await team.save()
 
+from pwncore.utils import PROBLEMS_CACHE, TEAMS_SOLVED_PROBS, update_team_solved
 
 @router.get("/create")
 async def init_db(
     response: Response, req: Request
 ):  # Inefficient, anyways will be used only once
-    if not bcrypt.verify((await req.body()).strip(), ADMIN_HASH):
-        response.status_code = 401
-        return
+    # if not bcrypt.verify((await req.body()).strip(), ADMIN_HASH):
+    #     response.status_code = 401
+    #     return
     await Problem.create(
         name="Invisible-Incursion",
         description="Chod de tujhe se na ho paye",
@@ -211,6 +212,51 @@ async def init_db(
         mi=200,
         ma=400,
     )
+    PROBLEMS_CACHE[1] = 300
+    await Problem.create(
+        name="Invisible-Incursion",
+        description="Chod de tujhe se na ho paye",
+        author="Meetesh Saini",
+        points=300,
+        image_name="key:latest",
+        image_config={"PortBindings": {"22/tcp": [{}]}},
+        mi=200,
+        ma=400,
+    )
+    PROBLEMS_CACHE[2] = 300
+    await Problem.create(
+        name="Invisible-Incursion",
+        description="Chod de tujhe se na ho paye",
+        author="Meetesh Saini",
+        points=300,
+        image_name="key:latest",
+        image_config={"PortBindings": {"22/tcp": [{}]}},
+        mi=200,
+        ma=400,
+    )
+    PROBLEMS_CACHE[3] = 300
+    await Problem.create(
+        name="Invisible-Incursion",
+        description="Chod de tujhe se na ho paye",
+        author="Meetesh Saini",
+        points=300,
+        image_name="key:latest",
+        image_config={"PortBindings": {"22/tcp": [{}]}},
+        mi=200,
+        ma=400,
+    )
+    PROBLEMS_CACHE[4] = 300
+    await Problem.create(
+        name="Invisible-Incursion",
+        description="Chod de tujhe se na ho paye",
+        author="Meetesh Saini",
+        points=300,
+        image_name="key:latest",
+        image_config={"PortBindings": {"22/tcp": [{}]}},
+        mi=200,
+        ma=400,
+    )
+    PROBLEMS_CACHE[5] = 300
     await PreEventProblem.create(
         name="Static_test",
         description="Chod de tujhe se na ho paye",
@@ -256,10 +302,21 @@ async def init_db(
         image_name="test:latest",
         image_config={"PortBindings": {"22/tcp": [{}], "5000/tcp": [{}]}},
     )
-    await Team.create(name="CID Squad", secret_hash=bcrypt.hash("veryverysecret"))
-    await Team.create(
+    x = await Team.create(name="CID Squad", secret_hash=bcrypt.hash("veryverysecret"))
+    
+    #[[PID, PENALTY], POINTS]
+    await update_team_solved(x, name="CID Squad")
+    x = await Team.create(
         name="Triple A battery", secret_hash=bcrypt.hash("chotiwali"), coins=20
     )
+    await update_team_solved(x, None, None, "Triple A battery",  20)
+    x = await Team.create(
+        name="Triplefe A battery", secret_hash=bcrypt.hash("chotiwalwf"), coins=20
+    )
+    await update_team_solved(x, None, None, "Triplefe A battery", 20)
+    for i in range(44):
+        x = await Team.create(name=f"Team{i}", secret_hash=bcrypt.hash(f"hello{i}"), coins=10)
+        await update_team_solved(x, None, None, f"Team{i}", 10)
     await PreEventUser.create(tag="23BCE1000", email="dd@ff.in")
     await PreEventUser.create(tag="23BRS1000", email="d2d@ff.in")
     await PreEventSolvedProblem.create(user_id="23BCE1000", problem_id="1")
@@ -309,12 +366,35 @@ async def init_db(
         team_id=1,
         phone_num=6666666666,
         email="email1@xyz.org",
-    )
+    )   
     await Hint.create(order=0, problem_id=1, text="This is the first hint")
     await Hint.create(order=1, problem_id=1, text="This is the second hint")
     await Hint.create(order=2, problem_id=1, text="This is the third hint")
     await Hint.create(order=0, problem_id=2, text="This is the first hint")
-    await Hint.create(order=1, problem_id=2, text="This is the second hint")
+    hint = await Hint.create(order=1, problem_id=2, text="This is the second hint")
     await SolvedProblem.create(team_id=2, problem_id=1)
+    await update_team_solved(2, 1)
+    await SolvedProblem.create(team_id=3, problem_id=1)
+    await update_team_solved(3, 1)
     await SolvedProblem.create(team_id=2, problem_id=2)
-    await SolvedProblem.create(team_id=1, problem_id=2)
+    await update_team_solved(2, 2)
+    # await SolvedProblem.create(team_id=1, problem_id=2)
+    await SolvedProblem.create(team_id=2, problem_id=3)
+    await update_team_solved(2, 3)
+    await SolvedProblem.create(team_id=2, problem_id=4)
+    await update_team_solved(2, 4)
+    await SolvedProblem.create(team_id=1, problem_id=1)
+    await update_team_solved(1, 1)
+    for i in range(4, 47):
+        await SolvedProblem.create(team_id=i, problem_id=1)
+        await update_team_solved(i, 1)
+    for i in range(5, 16):
+        await SolvedProblem.create(team_id=i, problem_id=2)
+        await update_team_solved(i, 2)
+    for i in range(10, 30):
+        await SolvedProblem.create(team_id=i, problem_id=3)
+        await update_team_solved(i, 3)
+    for i in range(15, 39):
+        await SolvedProblem.create(team_id=i, problem_id=4)
+        await update_team_solved(i, 4)
+    

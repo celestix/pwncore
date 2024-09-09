@@ -58,8 +58,8 @@ class Config:
 
 config = Config(
     development=True,
-    db_url="sqlite://:memory:",
-    docker_url=None,  # None for default system docker
+    db_url="sqlite://test.db",
+    docker_url="http://google.com",  # None for default system docker
     # Or set it to an arbitrary URL for testing without Docker
     # docker_url="http://google.com",
     flag="C0D",

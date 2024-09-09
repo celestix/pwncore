@@ -8,6 +8,7 @@ from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from pwncore.models.user import Team
+from pwncore.utils import PROBLEMS_CACHE
 
 __all__ = (
     "Problem",
@@ -48,11 +49,12 @@ class Problem(BaseProblem):
     async def _solves(self) -> int:
         return await SolvedProblem.filter(problem=self).count()
 
-    async def update_points(self) -> None:
+    async def update_points(self) -> int:
         self.points = round(
             self.mi + (self.ma - self.mi) * (1 - tanh((await self._solves()) / 25))
         )
         await self.save()
+        return self.points
 
 
 class Hint(Model):

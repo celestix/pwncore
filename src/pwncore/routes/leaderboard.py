@@ -13,7 +13,15 @@ metadata = {"name": "leaderboard", "description": "Operations on the leaderboard
 
 router = APIRouter(prefix="/leaderboard", tags=["leaderboard"])
 
+from pwncore.utils import TEAMS_SOLVED_PROBS, PROBLEMS_CACHE
 
+#  {
+#         "name": "Team41",
+#         "meta_team__name": null,
+#         "tpoints": 300.0
+#    },
+ 
+from typing import Dict
 class ExpiringLBCache:
     period: float
     last_update: float
@@ -23,8 +31,23 @@ class ExpiringLBCache:
         self.period = period
         self.last_update = 0
         self.data = []
-
+    # ({pid:penalty}, name, points)
     async def _do_update(self):
+        # total = []
+        # for i in TEAMS_SOLVED_PROBS:
+        #     data = TEAMS_SOLVED_PROBS[i]
+        #     tp = 0
+        #     # pid: penalty
+        #     probs: Dict[int, float] = data[0]
+        #     for pid in probs:
+        #         ppoints = PROBLEMS_CACHE[pid]
+        #         penalty = probs[pid]
+        #         if penalty == 0:
+        #             penalty = 1
+        #         tp += ppoints*penalty
+        #     tp += data[2]
+        #     total.append({"name":data[1], "tpoints": tp})
+        # self.data = total
         self.data = (
             await Team.all()
             .filter(Q(solved_problem__problem__visible=True) | Q(points__gte=0))
@@ -39,7 +62,6 @@ class ExpiringLBCache:
             .order_by("-tpoints")
             .values("name", "tpoints", "meta_team__name")
         )
-
         self.last_update = monotonic()
 
     async def get_lb(self, req: Request):

@@ -38,7 +38,7 @@ class PreEventSolvedProblem(Model):
 
 
 class PreEventUser(Model):
-    tag = fields.CharField(128, pk=True)
+    tag = fields.CharField(128, primary_key=True)
     email = fields.CharField(256, unique=True)
 
     solvedproblems: fields.ReverseRelation[PreEventSolvedProblem]

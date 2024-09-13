@@ -29,4 +29,4 @@ class Ports(Model):
     container: fields.ForeignKeyRelation[Container] = fields.ForeignKeyField(
         "models.Container", related_name="ports", on_delete=fields.OnDelete.CASCADE
     )
-    port = fields.IntField(pk=True)
+    port = fields.IntField(primary_key=True)

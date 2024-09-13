@@ -37,11 +37,8 @@ async def start_docker_container(ctf_id: int, response: Response, jwt: RequireJw
         team_container = await Container.filter(team=team_id, problem=ctf_id)
         if team_container:
             a, b = team_container[0], team_container[1:]
-            db_ports = await a.ports.all().values(
-                "port"
-            )  # Get ports from DB
-            ports = [db_port["port"]
-                     for db_port in db_ports]  # Create a list out of it
+            db_ports = await a.ports.all().values("port")  # Get ports from DB
+            ports = [db_port["port"] for db_port in db_ports]  # Create a list out of it
 
             for db_container in b:
                 try:

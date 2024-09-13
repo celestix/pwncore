@@ -56,7 +56,7 @@ class Problem(BaseProblem):
 
 
 class Hint(Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     order = fields.SmallIntField()  # 0, 1, 2
     problem: fields.ForeignKeyRelation[Problem] = fields.ForeignKeyField(
         "models.Problem", related_name="hints"

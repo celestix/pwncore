@@ -70,8 +70,7 @@ async def signup_team(team: SignupBody, response: Response):
         )
 
         for user in q:
-            # Mypy kinda not working
-            user.team_id = newteam.id  # type: ignore[attr-defined]
+            user.team_id = newteam.id
         if q:
             b = User.bulk_update(q, fields=["team_id"])
             # print(b.sql())

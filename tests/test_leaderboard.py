@@ -1,4 +1,6 @@
-from tests import *
+import pytest
+from httpx import AsyncClient
+
 
 @pytest.mark.anyio
 async def test_login(client: AsyncClient):

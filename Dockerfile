@@ -1,7 +1,5 @@
 FROM python:3.12-slim
 
-ENV DOCKER_HOST=unix:///var/run/docker.sock
-
 WORKDIR /app
 
 RUN pip install poetry
@@ -19,4 +17,4 @@ WORKDIR /app/src
 EXPOSE 8000
 
 # Run FastAPI with Gunicorn
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "pwncore:app"]
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "pwncore:app", "--bind", "0.0.0.0:8000"]

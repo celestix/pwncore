@@ -1,16 +1,17 @@
 from typing import AsyncGenerator
 from contextlib import asynccontextmanager
 
+import aiodocker
+from aiodocker import docker
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from tortoise import Tortoise, generate_config
 from tortoise.contrib.fastapi import RegisterTortoise
 
+import pwncore.containerASD as containerASD
 import pwncore.docs as docs
 import pwncore.routes as routes
-
-from pwncore.container import docker_client
 from pwncore.config import config
 from pwncore.models import Container
 
@@ -48,27 +49,32 @@ async def app_lifespan(app: FastAPI):
             db_url=config.db_url, modules={"models": ["pwncore.models"]}
         )
         await Tortoise.generate_schemas()
+    # Startup
+    await Tortoise.init(db_url=config.db_url, modules={"models": ["pwncore.models"]})
+    await Tortoise.generate_schemas()
 
-        yield
-        # Shutdown
-        # Stop and remove all running containers
-        containers = await Container.all().values()
-        await Container.all().delete()
-        for db_container in containers:
-            try:
-                container = await docker_client.containers.get(
-                    db_container["docker_id"]
-                )
-                await container.kill()
-                await container.delete()
-            except (
-                Exception
-            ):  # Raises DockerError if container does not exist, just pass for now.
-                pass
+    containerASD.docker_client = aiodocker.Docker(url=config.docker_url)
 
-        # close_connections is deprecated, not sure how to use connections.close_all()
-        await Tortoise.close_connections()
-        await docker_client.close()
+    yield
+    # Shutdown
+    # Stop and remove all running containers
+    containers = await Container.all().values()
+    await Container.all().delete()
+    for db_container in containers:
+        try:
+            container = await containerASD.docker_client.containers.get(
+                db_container["docker_id"]
+            )
+            await container.kill()
+            await container.delete()
+        except (
+            Exception
+        ):  # Raises DockerError if container does not exist, just pass for now.
+            pass
+
+    # close_connections is deprecated, not sure how to use connections.close_all()
+    await Tortoise.close_connections()
+    await containerASD.docker_client.close()
 
 
 app = FastAPI(
